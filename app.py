@@ -1,6 +1,7 @@
 from flask import Flask, jsonify
 from flask_sqlalchemy import SQLAlchemy
 from flask_openapi3 import OpenAPI, Info
+from flask_cors import CORS
 from pydantic import BaseModel, Field, ValidationError
 import numpy as np
 import joblib
@@ -8,6 +9,8 @@ import joblib
 # Inicializando Flask e Banco de Dados
 info = Info(title="Water Quality API", version="1.0.0")
 app = OpenAPI(__name__, info=info)
+
+CORS(app, supports_credentials=True, methods=["GET", "HEAD", "POST", "DELETE", "PUT", "OPTIONS", "PATCH"], origins="*", resources={r"/*": {"origins": "*"}})
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///water_quality.db'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
