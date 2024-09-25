@@ -1,7 +1,3 @@
-Aqui está um exemplo de arquivo `README.md` em português para o seu projeto de API de previsão de qualidade da água com Flask, SQLAlchemy, OpenAPI e Pydantic:
-
----
-
 # API de Previsão da Qualidade da Água
 
 Este projeto é uma **API de Previsão da Qualidade da Água** desenvolvida com Python, Flask, SQLAlchemy, OpenAPI 3 (Swagger) e Pydantic para validação de esquemas. A API prevê a potabilidade da água com base em vários parâmetros de qualidade e fornece uma interface CRUD para gerenciar as entradas de qualidade da água em um banco de dados SQLite.
