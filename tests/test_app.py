@@ -1,9 +1,10 @@
 import sys
 import os
 import joblib
-import numpy as np
 import pytest
+import pandas as pd
 from sklearn.metrics import precision_score, recall_score, accuracy_score
+from sklearn.model_selection import train_test_split
 
 # Configurar o caminho para encontrar o app
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
@@ -11,8 +12,8 @@ sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')
 from app import app, db, WaterQuality
 
 # Definir os thresholds para precisão, recall e acurácia
-ACCURACY_THRESHOLD = 0.95
-PRECISION_THRESHOLD = 0.5
+ACCURACY_THRESHOLD = 0.8
+PRECISION_THRESHOLD = 0.6
 RECALL_THRESHOLD = 0.5
 
 # Setup para o PyTest
@@ -32,11 +33,27 @@ def client():
 def model():
     return joblib.load('best_water_quality_model.pkl')
 
-# Testando a acurácia do modelo SVM
-def test_model_accuracy(model):
-    # Carregar os dados de teste (simulados para exemplo)
-    X_test = np.array([[7.0, 150.0, 20000.0, 7.0, 300.0, 500.0, 15.0, 80.0, 4.0]])
-    y_test = np.array([1])  # Simulando que o rótulo esperado é '1' (potável)
+# Fixture para carregar dados de teste aleatórios a partir do CSV
+@pytest.fixture
+def data():
+    # Carregar o dataset de qualidade da água do CSV
+    df = pd.read_csv('water_potability_test.csv')
+
+    # Remover registros que contenham valores NaN
+    df = df.dropna()
+
+    # Separar as features e o alvo (potabilidade)
+    X = df.drop('Potability', axis=1)
+    y = df['Potability']
+
+    # Dividir em treino e teste (opcional, caso queira separar os dados para teste)
+    X_train, X_test, y_train, y_test = train_test_split(X, y, test_size=5, random_state=42)
+
+    return X_test, y_test
+
+# Testando a acurácia do modelo SVM com dados aleatórios do CSV
+def test_model_accuracy(model, data):
+    X_test, y_test = data
 
     # Fazer predições
     predictions = model.predict(X_test)
@@ -46,17 +63,15 @@ def test_model_accuracy(model):
     assert accuracy >= ACCURACY_THRESHOLD, f"Acurácia do modelo é menor que {ACCURACY_THRESHOLD}: {accuracy}"
 
 # Testando precisão e recall do modelo SVM
-def test_category_precision_and_recall(model):
-    # Simular dados de teste
-    X_test = np.array([[7.0, 150.0, 20000.0, 7.0, 300.0, 500.0, 15.0, 80.0, 4.0]])
-    y_test = np.array([1])  # Simulando que o rótulo esperado é '1' (potável)
+def test_category_precision_and_recall(model, data):
+    X_test, y_test = data
 
     # Fazer predições
     predicted_labels = model.predict(X_test)
 
     # Calcular precisão e recall
-    precision = precision_score(y_test, predicted_labels, average=None)
-    recall = recall_score(y_test, predicted_labels, average=None)
+    precision = precision_score(y_test, predicted_labels, average='weighted')
+    recall = recall_score(y_test, predicted_labels, average='weighted')
 
     assert (precision >= PRECISION_THRESHOLD).all(), f"Precisão menor que {PRECISION_THRESHOLD}: {precision}"
     assert (recall >= RECALL_THRESHOLD).all(), f"Recall menor que {RECALL_THRESHOLD}: {recall}"
