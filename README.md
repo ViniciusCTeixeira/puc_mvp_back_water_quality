@@ -91,7 +91,7 @@ Certifique-se de ter os seguintes itens instalados em seu sistema:
 
 1. **Clonar o repositório**:
    ```bash
-   git clone git@github.com:ViniciusCTeixeira/puc_mvp_back_water_quality.git
+   git clone https://github.com/ViniciusCTeixeira/puc_mvp_back_water_quality.git
    cd puc_mvp_back_water_quality
    ```
 
