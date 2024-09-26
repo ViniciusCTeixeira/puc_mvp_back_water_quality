@@ -1,9 +1,19 @@
 import sys
 import os
+import joblib
+import numpy as np
+import pytest
+from sklearn.metrics import precision_score, recall_score, accuracy_score
+
+# Configurar o caminho para encontrar o app
 sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-import pytest
 from app import app, db, WaterQuality
+
+# Definir os thresholds para precisão, recall e acurácia
+ACCURACY_THRESHOLD = 0.95
+PRECISION_THRESHOLD = 0.5
+RECALL_THRESHOLD = 0.5
 
 # Setup para o PyTest
 @pytest.fixture
@@ -16,6 +26,40 @@ def client():
         yield client
         with app.app_context():
             db.drop_all()
+
+# Fixture para carregar o modelo SVM
+@pytest.fixture
+def model():
+    return joblib.load('best_water_quality_model.pkl')
+
+# Testando a acurácia do modelo SVM
+def test_model_accuracy(model):
+    # Carregar os dados de teste (simulados para exemplo)
+    X_test = np.array([[7.0, 150.0, 20000.0, 7.0, 300.0, 500.0, 15.0, 80.0, 4.0]])
+    y_test = np.array([1])  # Simulando que o rótulo esperado é '1' (potável)
+
+    # Fazer predições
+    predictions = model.predict(X_test)
+
+    # Calcular a acurácia
+    accuracy = accuracy_score(y_test, predictions)
+    assert accuracy >= ACCURACY_THRESHOLD, f"Acurácia do modelo é menor que {ACCURACY_THRESHOLD}: {accuracy}"
+
+# Testando precisão e recall do modelo SVM
+def test_category_precision_and_recall(model):
+    # Simular dados de teste
+    X_test = np.array([[7.0, 150.0, 20000.0, 7.0, 300.0, 500.0, 15.0, 80.0, 4.0]])
+    y_test = np.array([1])  # Simulando que o rótulo esperado é '1' (potável)
+
+    # Fazer predições
+    predicted_labels = model.predict(X_test)
+
+    # Calcular precisão e recall
+    precision = precision_score(y_test, predicted_labels, average=None)
+    recall = recall_score(y_test, predicted_labels, average=None)
+
+    assert (precision >= PRECISION_THRESHOLD).all(), f"Precisão menor que {PRECISION_THRESHOLD}: {precision}"
+    assert (recall >= RECALL_THRESHOLD).all(), f"Recall menor que {RECALL_THRESHOLD}: {recall}"
 
 # Testando predição válida
 def test_valid_prediction(client):

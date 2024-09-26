@@ -132,7 +132,11 @@ Certifique-se de ter os seguintes itens instalados em seu sistema:
 ## Modelo e Conjunto de Dados
 
 O modelo utilizado para prever a potabilidade da água é um modelo SVM treinado no [Water Quality Dataset](https://github.com/ViniciusCTeixeira/puc_mvp_dataset_water_quality). O modelo foi pré-treinado e salvo como um arquivo `.pkl`, que é carregado pela API.
-
+1. **Comando para teste**:
+   ```bash
+   pytest -p no:warnings
+   ```
+   
 ## Estrutura do Projeto
 
 ```bash
